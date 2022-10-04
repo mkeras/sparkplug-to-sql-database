@@ -1,0 +1,29 @@
+version: '3.9'
+
+services:
+  iono2x_sparkplug_sql_recorder:
+    build: ./
+    #restart: unless-stopped
+    environment:
+      - SQL_DATABASE_HOST=10.0.1.20
+      - SQL_DATABASE_USERNAME=iono2x_sparkplug_sql_recorder
+      - SQL_DATABASE_PASSWORD=kjy2PE1SNW6AbO8N
+      - SQL_DATABASE_NAME=spb_v1_0_history
+
+      - MQTT_USERNAME=sparkplug_to_db
+      - MQTT_PASSWORD=SYOyr7PIwIdcboKGmk_bag
+      - MQTT_HOST=mqtt.iono2x.com
+      - MQTT_USE_TLS=True
+      - MQTT_PORT=8873
+
+      - SPARKPLUG_GROUP_ID=uas_iono2x_server
+      - SPARKPLUG_EDGE_NODE_ID=iono2x_sparkplug_sql_recorder
+#     networks:
+#       iono2x_net:
+#         ipv4_address: 10.0.2.22
+
+
+# networks:
+#   iono2x_net:
+#     external: true
+#     name: iono2x_enterprise_net
