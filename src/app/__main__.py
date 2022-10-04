@@ -185,7 +185,7 @@ names_cache = MetricNameCache()
 db_ids_cache = DbIdCache()
 
 
-def save_payload(topic: dict, payload: dict, raw_payload: bytes):
+def save_payload(topic: dict, payload: dict, raw_payload: bytes, raw_topic: str):
     edge_node_db_id, device_db_id = db_ids_cache.get_ids_from_topic(topic)
     assert edge_node_db_id is not None
     if topic['device_id']:
@@ -196,6 +196,7 @@ def save_payload(topic: dict, payload: dict, raw_payload: bytes):
         timestamp=payload['timestamp'],
         sequence=payload['seq'],
         message_type=topic['message_type'],
+        raw_topic=raw_topic,
         raw_payload=raw_payload
     )
     db.session.add(db_payload)
@@ -244,7 +245,7 @@ def sparkplug_message(function):
         topic = decode_sparkplug_b_topic(message.topic)
         payload = spb_dataclasses.Payload.from_mqtt_payload(message.payload).to_dict()
 
-        db_payload = save_payload(topic, payload, message.payload)
+        db_payload = save_payload(topic, payload, message.payload, message.topic)
 
         function(client, topic, payload)
 

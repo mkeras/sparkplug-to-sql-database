@@ -1,4 +1,5 @@
 from enum import unique
+import string
 import config as cfg
 from sqlalchemy import create_engine, Column, String, Integer, Float, Enum, Boolean, BINARY, LargeBinary, BLOB, BigInteger, ForeignKey, ForeignKeyConstraint, UniqueConstraint
 from sqlalchemy.ext.declarative import declarative_base
@@ -72,6 +73,7 @@ class SparkplugBPayload(base):
     sequence = Column(Integer)
     message_type = Column(Enum(MessageTypes))
 
+    raw_topic = Column(String(512))
     raw_payload = Column(LargeBinary(26_214_400))  # Max 25MB size, MQTT Payloads can actually be up to 256MB
 
 
