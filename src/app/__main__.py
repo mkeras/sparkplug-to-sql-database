@@ -319,6 +319,7 @@ def on_cmd_message(client, topic: dict, payload: dict):
 
 def on_connect(client, userdata, flags, rc):
     client.subscribe(f'spBv1.0/+/+/#')
+    client.publish(f'STATE/{cfg.SPARKPLUG_HOST_ID}', 'ONLINE', 1, True)
 
 
 mqtt_client.on_connect = on_connect
@@ -334,6 +335,8 @@ mqtt_client.message_callback_add('spBv1.0/+/DDATA/+/+', on_data_message)
 
 mqtt_client.message_callback_add('spBv1.0/+/NCMD/#', on_cmd_message)
 mqtt_client.message_callback_add('spBv1.0/+/DCMD/+/#', on_cmd_message)
+
+mqtt_client.will_set(f'STATE/{cfg.SPARKPLUG_HOST_ID}', 'OFFLINE', 1, True)
 
 mqtt_client.connect(host=cfg.MQTT_HOST, port=cfg.MQTT_PORT, keepalive=cfg.MQTT_KEEPALIVE)
 
