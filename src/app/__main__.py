@@ -242,25 +242,38 @@ def save_metrics(payload_db_id: int, metrics: list[dict]):
 
 def sparkplug_message(function):
     def load_message(client, userdata, message):
-        topic = decode_sparkplug_b_topic(message.topic)
-        payload = spb_dataclasses.Payload.from_mqtt_payload(message.payload).to_dict()
+        try:
+            topic = decode_sparkplug_b_topic(message.topic)
+            payload = spb_dataclasses.Payload.from_mqtt_payload(message.payload).to_dict()
 
-        db_payload = save_payload(topic, payload, message.payload, message.topic)
+            db_payload = save_payload(topic, payload, message.payload, message.topic)
 
-        function(client, topic, payload)
+            function(client, topic, payload)
 
-        if 'metrics' in payload:
-            names_cache.add_names_to_metrics(
-                group_id=topic['group_id'],
-                node_id=topic['node_id'],
-                device_id=topic['device_id'],
-                metrics=payload['metrics']
-            )
+            if 'metrics' in payload:
+                names_cache.add_names_to_metrics(
+                    group_id=topic['group_id'],
+                    node_id=topic['node_id'],
+                    device_id=topic['device_id'],
+                    metrics=payload['metrics']
+                )
 
-            # TODO SAVE METRICS TO DATABASE
-            save_metrics(db_payload.id, payload['metrics'])
+                save_metrics(db_payload.id, payload['metrics'])
 
-        logging.warning(f'SUCCESSFULLY PROCESSED MESSAGE FROM: {message.topic}')
+            logging.warning(f'SUCCESSFULLY PROCESSED MESSAGE FROM: {message.topic}')
+        except Exception as err:
+            logging.warning(f'AN ERROR HAS OCCURED: topic: {message.topic} | error: {err}')
+            try:
+                error_log = db.ErrorLogs(
+                    timestamp=spb.millis(),
+                    error_string=str(err),
+                    payload=message.payload,
+                    topic=message.topic
+                )
+                db.session.add(error_log)
+                db.session.commit()
+            except Exception as err:
+                logging.error(f'COULD NOT SAVE ERROR TO DATABASE: topic: {message.topic} | error: {err}')
 
     return load_message
 
@@ -281,7 +294,6 @@ def on_birth_message(client, topic: dict, payload: dict):
         device_id=topic['device_id'],
         metrics=payload['metrics']
     )
-    
 
 
 @sparkplug_message
