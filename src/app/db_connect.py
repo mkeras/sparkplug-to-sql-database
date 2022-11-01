@@ -12,7 +12,7 @@ import time
 
 time.sleep(2)
 
-engine = create_engine(cfg.SQL_DATABASE_URI, echo=False)
+engine = create_engine(cfg.SQL_DATABASE_URI, pool_pre_ping=True, echo=False)
 
 logging.warning(f'CONNECTING DATABASE {engine.url}')
 
