@@ -274,6 +274,7 @@ def sparkplug_message(function):
                 db.session.commit()
             except Exception as err:
                 logging.error(f'COULD NOT SAVE ERROR TO DATABASE: topic: {message.topic} | error: {err}')
+                exit()
 
     return load_message
 
